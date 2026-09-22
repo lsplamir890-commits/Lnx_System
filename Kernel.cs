@@ -433,6 +433,8 @@ public class Kernel : Sys.Kernel
                 Console.WriteLine("  ver     - Shows the os version");
                 Console.WriteLine("  abt     - Shows some data");
                 Console.WriteLine("  echo     - echos the text you inputed");
+                Console.WriteLine("  re-setup     - will ask you to reboot your computer and you will be taken to the setup");
+                Console.WriteLine("  lnkrnl -check     - checks LnxOS for any problems");
                 break;
             case "ver":
                 Console.WriteLine("Dev Test Thanks for trying this os");
