@@ -185,26 +185,29 @@ public class Kernel : Sys.Kernel
             ulong totalBytes = stats.Blocks * stats.BlockSize;
             Console.WriteLine($"{freeBytes} bytes of hdd left [OK]");
         }
+        Console.ForegroundColor = ConsoleColor.DarkGreen;
         Console.WriteLine("KERNEL booted successfully!");
         Console.WriteLine("tip: If you want to see all commands type 'help' and press enter.\nAlso This is a beta under Development ");
 
     }
+    static int line = 0;
     static string username = ReadIni("/mnt/LunDos.ini", "username");
     protected override void Run()
     {
-
+        line ++;
         
         try
         {
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.Write($"{username}");
            
-
-            Console.Write($"{username}@~ $ {Directory.GetCurrentDirectory()} > ");
+            Console.Write($"@~ $ {Directory.GetCurrentDirectory()} > ");
         }
         catch
         {
             Console.Write("root@~ $ UNKNOWNDRIVE > ");
         }
-        
+        Console.ForegroundColor = ConsoleColor.White;
         var input = Console.ReadLine().ToLower();
 
         if (string.IsNullOrEmpty(input))
@@ -219,6 +222,7 @@ public class Kernel : Sys.Kernel
             }
             catch (Exception e)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"Failed to create directory '{directory}'");
             }
             return;
@@ -234,6 +238,7 @@ public class Kernel : Sys.Kernel
             }
             catch
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{directory} is missing or its corrupt and damaged");
             }
             return;
@@ -254,6 +259,7 @@ public class Kernel : Sys.Kernel
             }
             catch
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"This isnt a valid file/folder or it  doesnt exist");
             }
             return;
@@ -268,6 +274,7 @@ public class Kernel : Sys.Kernel
             }
             catch
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"This isnt a valid file or it  doesnt exist");
             }
             return;
@@ -277,13 +284,14 @@ public class Kernel : Sys.Kernel
             string filename = input.Split(" ")[2].Trim();
             try
             {
-                
+                Console.ForegroundColor = ConsoleColor.Blue;
                 Console.WriteLine("Type the text :");
                 string  text = Console.ReadLine();
                 File.WriteAllText($"{Directory.GetCurrentDirectory()}/{filename}", text);
             }
             catch
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"Couldnt make a new file");
             }
             return;
@@ -297,7 +305,7 @@ public class Kernel : Sys.Kernel
         switch (input.ToLower())
         {
             case "date":
-            
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"{DateTime.Now}");
             break;
             case "format":
@@ -311,26 +319,13 @@ public class Kernel : Sys.Kernel
                 if (StorageManager.Partitions.Count == 0
                     || !VfsManager.TryFormat("fat", StorageManager.Partitions[0], options))
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Format failed");
                 }   
                 VfsManager.TryMount("fat", StorageManager.Partitions[0], MountFlags.None, "/mnt", out VfsManager.VfsMount? mount);
                 
             break;
-            case "format -v ext2":
-                VfsManager.TryUnmount("/mnt");
-                Ext2FormatOptions option = new()
-                {
-                    VolumeLabel = $"{DefaultPartName}     ",
-                };
-
-                if (StorageManager.Partitions.Count == 0
-                    || !VfsManager.TryFormat("ext2", StorageManager.Partitions[0], option))
-                {
-                    Console.WriteLine("Format failed");
-                }   
-                VfsManager.TryMount("ext2", StorageManager.Partitions[0], MountFlags.None, "/mnt", out VfsManager.VfsMount? mount1);
-                
-            break;
+          
             case "maketestfile":
             try
             {
@@ -345,7 +340,7 @@ public class Kernel : Sys.Kernel
             case "ls":
             string[] files = Directory.GetFiles(Directory.GetCurrentDirectory());
             string[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory());
-
+            Console.ForegroundColor = ConsoleColor.Blue;
             Console.Write("|Files| \n");
             foreach (string file in files)
             {
@@ -358,8 +353,70 @@ public class Kernel : Sys.Kernel
             }
 
             break;
-            
+            case "lnkrnl -check":
+            int errors = 0;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Checking LnxOS ");
+
+            if(File.Exists("/mnt/LunDos.ini"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("LunDos.ini is healthy");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("LunDos.ini Doesnt exist or its corrupted");
+                Console.ForegroundColor = ConsoleColor.White;
+                errors =+ 1;
+            }
+             if(File.Exists("/mnt/instLuviz.lze"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("instLuviz.lze is healthy");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("instLuviz.lze Doesnt exist or its corrupted");
+                Console.ForegroundColor = ConsoleColor.White;
+                errors =+ 1;
+            }            
+            if(Directory.Exists("/mnt/SysSetts"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("SysSetts is healthy!");
+                Console.ForegroundColor = ConsoleColor.White;
+                
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("SysSetts directory isnt healthy");
+                Console.ForegroundColor = ConsoleColor.White;
+                errors =+ 1;
+            }
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"There are: {errors}. \nIf theres any errors Please fix your installation");
+            break;
+            case "re-setup":
+                Console.BackgroundColor = ConsoleColor.Blue;
+                Console.Clear();
+                
+                Console.WriteLine("Please press any key to restart");
+
+                Console.ReadKey();
+                if(File.Exists("/mnt/instLuviz.lze"))
+                {
+                    File.Delete("/mnt/instLuviz.lze");
+                }
+                Power.Reboot();
+            break;
             case "help":
+                Console.ForegroundColor = ConsoleColor.Green;
+            
                 Console.WriteLine("Available commands:");
                 Console.WriteLine("  echo > <filename> - Read a file and it displays text");
                 Console.WriteLine("  echo < <filename> - Writes a file to the primary partition");
@@ -378,7 +435,7 @@ public class Kernel : Sys.Kernel
                 Console.WriteLine("  echo     - echos the text you inputed");
                 break;
             case "ver":
-                Console.WriteLine("RELEASE!!! Thanks for trying this os");
+                Console.WriteLine("Dev Test Thanks for trying this os");
             break;
             
             case "abt":
@@ -386,7 +443,7 @@ public class Kernel : Sys.Kernel
              Console.WriteLine("Simple but a little creative os");
              Console.WriteLine("Kernel: lnkrnl\nKernel Achitecture: ln");
              Console.WriteLine("Thanks for reading this and trying this");
-             Console.WriteLine("Made on: Gen 3 v3.0.87 COSMOS");
+             Console.WriteLine("Made on: Gen 3 v3.0.88 COSMOS");
             break;
             case "clear":
                 Console.Clear();
@@ -398,7 +455,8 @@ public class Kernel : Sys.Kernel
                 break;
             
             default:
-                Console.WriteLine($"\"{input}\" is not a command");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Shell Failed at line:{line}: \"{input}\" is not a command");
                 break;
             
         }
