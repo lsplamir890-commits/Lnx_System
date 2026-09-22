@@ -1,5 +1,5 @@
 # Lnx_System
-this is an os that was made using cosmos. This os sint supposed to be good and i was lazy while making it so pls no hate. you can pull request if you want to fix some bugs ,ig
+this is an os that was made using cosmos. You can pull request at any time. most bugs will be released on v1 development
 
 But yeah nothing else special
 
@@ -7,7 +7,7 @@ But yeah nothing else special
 Cosmos is a kit for C# os's like this one 
 | well this os was made in cosmos Cuz i was to lazy to set up linkers and a gdt and idt
 
-  Cosmos is a great project, idk if you want to test it
+  Cosmos is a great project
 
 # Random
 If you steal this os and rebrand it and still call it your's, you will be on some trouble.
@@ -17,4 +17,5 @@ You can publish an os containing some of this source code, but you must make a b
 Dont brand it as yours.
 
 # other
-  i was lazy making this os
+  This is experimental,
+  Date of release: 9/22/2026 0AM or 12pm
