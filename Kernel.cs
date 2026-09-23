@@ -1,3 +1,5 @@
+//DEV OF LNKRNL V1
+
 using System;
 using Sys = Cosmos.Kernel.System;
 using System.IO;
