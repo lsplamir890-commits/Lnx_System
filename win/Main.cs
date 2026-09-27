@@ -34,7 +34,7 @@ public class InstallService
             txtMgr.normal("\n\nYou must press F2 or F3\nThis is a beta so expect bugs\nSome times it will break so much it may format your drive\nMade by jsplashh 2026 (C)\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
             Console.BackgroundColor = ConsoleColor.Gray;  
             
-            Console.Write("\nF2 to start setup | Press F3 to create a partion and reformat/format");
+            Console.Write("\nF2 to start setup | Press F3 reformat/format");
             Console.BackgroundColor = ConsoleColor.Blue;  
             ConsoleKeyInfo  key = Console.ReadKey(true);
             switch(key.Key)
