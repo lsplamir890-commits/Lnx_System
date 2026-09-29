@@ -12,9 +12,47 @@ using Cosmos.Kernel.System.Diagnostics;
 using Cosmos.Kernel.System.Filesystems.Ext2;
 using lnkrnl;
 using System.Runtime.InteropServices;
+using System.Text.Encodings.Web;
 namespace lnkrnl;
 public class UtilityLNX
 {
+    public static void Panic(string text, string id)
+    {
+        try
+        {
+                    Console.CursorVisible = false;
+                    Console.BackgroundColor = ConsoleColor.Blue;
+                    Console.Clear();
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    txtMgr.error("YOUR PC HAS BEEN HALTED!\n");
+                    Console.BackgroundColor = ConsoleColor.Blue;
+                    txtMgr.normal("a problem has occurred that caused the system to stop\n\n");
+                    txtMgr.normal("For future use, a log file has been made");
+                    if(Directory.Exists("/mnt/SysSetts"))
+                    {
+                    File.AppendAllText("/mnt/SysSetts/Panic.log", $"BSOD at {DateTime.Now}, Name: {text}, ERROR code:{id}\n");
+                    } else
+                    {
+
+                        Directory.CreateDirectory("/mnt/SysSetts/");
+                    }
+                    
+                    txtMgr.error("ERROR CODE ID:");
+                    txtMgr.customNL(ConsoleColor.DarkRed, $"{id}\n\n");
+                    txtMgr.error($"ERROR CODE NAME:");
+                    
+                    txtMgr.customNL(ConsoleColor.DarkRed, $"{text}\n\n");
+                    txtMgr.aprove($"IT IS SAFE TO REBOOT[{text},{id}]");
+                    
+                    Power.Shutdown(); //i use shutdown() as halt btw.
+        } 
+        catch
+        {
+            Panic("PANIC_IN_PANIC", "0x0");
+        }
+       
+
+    }
     public static string ReadIni(string Path, string target)
     {
         string[] file = File.ReadAllLines(Path); 
