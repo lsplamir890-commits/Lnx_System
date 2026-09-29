@@ -27,7 +27,7 @@ public class Newshell
         CmdMgr.Init();
         while(true)
         {
-            txtMgr.custom(ConsoleColor.Magenta, "@root $");
+            Console.Write($"@~ $ {Directory.GetCurrentDirectory()} > ");
             Console.ForegroundColor = ConsoleColor.White;
             string input = Console.ReadLine();
 
