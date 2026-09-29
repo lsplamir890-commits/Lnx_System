@@ -1,5 +1,4 @@
-//DEV OF LNKRNL V1
-
+//DEV OF LNKRNL V0.6
 using System;
 using Sys = Cosmos.Kernel.System;
 using System.IO;
@@ -168,20 +167,32 @@ public class Kernel : Sys.Kernel
             ulong totalBytes = stats.Blocks * stats.BlockSize;
             Console.WriteLine($"{freeBytes} bytes of hdd left [OK]");
         }
+        if(!File.Exists("/mnt/LunDos.ini"))
+        {
+            try
+            {
+                File.AppendAllText("/mnt/LunDos.ini", "username=LN_KERNEL_RECOVERY");
+            }
+            catch
+            {
+                UtilityLNX.Panic("Could not repair lundos.ini", "0x0000ef");
+            }
+            UtilityLNX.Panic("LunDos Is dead", "0xEa0FDf");
+        }
         Console.ForegroundColor = ConsoleColor.DarkGreen;
         Console.WriteLine("KERNEL booted successfully!");
         Console.WriteLine("tip: If you want to see all commands type 'help' and press enter.\nAlso This is a beta under Development ");
-
+        if(guionboot == "true")
+        {
+            txtMgr.aprove("Gui on boot is true");
+        }
     }
     static int line = 0;
     static string guionboot = UtilityLNX.ReadIni("/mnt/LunDos.ini","GuiOnBoot");
     static string username = UtilityLNX.ReadIni("/mnt/LunDos.ini", "username");
     protected override void Run()
     {
-        if(guionboot == "true")
-        {
-            txtMgr.aprove("Gui on boot is true");
-        }
+
         if(man == true)
         {
             username = "Native_LN_COSMOS";
@@ -296,6 +307,25 @@ public class Kernel : Sys.Kernel
         }
         switch (input.ToLower())
         {
+            case "reboot":
+                txtMgr.warn("rebooting...");
+                Power.Reboot();
+            break;
+            case "collect":
+                txtMgr.info("using gc.collect()...");
+                try
+                {
+                    UtilityLNX.Panic("TESTING.", "0x000000");
+                }
+                catch
+                {
+                    txtMgr.error("Could not collect the garbage");
+                }
+            break;
+            case "gui":
+                txtMgr.error("Gui is on testing. Are you sure you want to start it?");
+                txtMgr.warn("Doenst work currently");
+            break;
             case "date":
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"{DateTime.Now}");
@@ -364,6 +394,7 @@ public class Kernel : Sys.Kernel
                 Console.WriteLine("LunDos.ini Doesnt exist or its corrupted");
                 Console.ForegroundColor = ConsoleColor.White;
                 errors =+ 1;
+
             }
              if(File.Exists("/mnt/instLuviz.lze"))
             {
@@ -405,6 +436,7 @@ public class Kernel : Sys.Kernel
                 if(File.Exists("/mnt/instLuviz.lze"))
                 {
                     File.Delete("/mnt/instLuviz.lze");
+                    File.Delete("/mnt/LunDos.ini");
                 }
                 Power.Reboot();
             break;
@@ -429,6 +461,8 @@ public class Kernel : Sys.Kernel
                 Console.WriteLine("  echo     - echos the text you inputed");
                 Console.WriteLine("  re-setup     - will ask you to reboot your computer and you will be taken to the setup");
                 Console.WriteLine("  lnkrnl -check     - checks LnxOS for any problems");
+                Console.WriteLine("  reboot     - Reboots the computer");
+                Console.WriteLine("  gui     - placeholder command for future beta-testing gui");
                 break;
             case "ver":
                 Console.WriteLine("Dev Test Thanks for trying this os");
@@ -439,7 +473,7 @@ public class Kernel : Sys.Kernel
              Console.WriteLine("Simple but a little creative os");
              Console.WriteLine("Kernel: lnkrnl\nKernel Achitecture: ln");
              Console.WriteLine("Thanks for reading this and trying this");
-             Console.WriteLine("Made on: Gen 3 v3.0.88 COSMOS");
+             //Console.WriteLine("Made on: Gen 3 v3.0.88 COSMOS");
             break;
             case "clear":
                 Console.Clear();
@@ -458,4 +492,5 @@ public class Kernel : Sys.Kernel
         }
         GC.Collect();
     }
+    
 }
