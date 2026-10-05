@@ -1,5 +1,9 @@
 # Lnx_System
 
+> [!WARNING]
+> This is a work-in-progress, certain things may not work as expected.
+> If you know how to fix an issue, create a pull request!
+
 **Lnx_System** is an operating system made in Cosmos gen3.
 
 ## License
