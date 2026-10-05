@@ -1,4 +1,4 @@
-//DEV OF LNKRNL V0.6
+//Dev of lnkrnl 0.7
 using System;
 using Sys = Cosmos.Kernel.System;
 using System.IO;
@@ -13,7 +13,8 @@ using Cosmos.Kernel.System.Diagnostics;
 using Cosmos.Kernel.System.Filesystems.Ext2;
 using lnkrnl;
 using System.Runtime.InteropServices;
-
+using Cosmos.Executable.Lua;
+using Mono.Cecil;
 
 namespace lnkrnl;
 
@@ -22,14 +23,17 @@ namespace lnkrnl;
 /// </summary>
 public class Kernel : Sys.Kernel
 {
-    
-    static bool man = false;   
-    static string DefaultPartName = UtilityLNX.ReadIni("/mnt/LunDos.ini", "FsName");
-    Stream? resource = assembly.GetExecutingAssembly().GetManifestResourceStream("promaxkernel.EmbeddedFile.txt");
 
+    static bool man = false;   
+    static string DefaultPartName = UtilityLNX.ReadIni("/mnt/LNXsys/System64/LunDos.ini", "FsName");
+    
 
     protected override void BeforeRun()
     {
+        
+
+        
+        
         IBlockDevice? disk = StorageManager.PrimaryDevice;
         FatFilesystemType fat = new();
 
@@ -38,121 +42,59 @@ public class Kernel : Sys.Kernel
             Console.WriteLine("The name \"fat\" is already registered.");
             return;
         }
-        Gpt.Create(disk);
-        if (!PartitionManager.Create(disk, startSector: 2048, sectorCount: 131072,
-                                    mbrSystemId: 0x0C, gptType: Gpt.BasicDataPartitionType))
-        {
-            Console.WriteLine("Create failed");
-            return;
-        }
-        else
-        {
-            Console.WriteLine("Partition created successfully.");
-        }
+
         StorageManager.RescanPartitions(disk);
         if (StorageManager.Partitions.Count == 0)
         {
+            
             Console.WriteLine("No partitions found.");
+            try
+            {
+                txtMgr.normal("Starting partitioning...");
+                UtilityLNX.createpart();
+                Power.Reboot();
+            }
+            catch
+            {
+                Console.Clear();
+                txtMgr.warn("SYSTEM HALTED. could not partition your disk. Please restart and DO NOT REMOVE THE CD OR USB") ;
+                 Power.Shutdown();
+            }
             return;
         }
         if (VfsManager.TryMount("fat", StorageManager.Partitions[0], MountFlags.None, "/mnt", out VfsManager.VfsMount? mount))
         {
             Console.WriteLine("Mounted " + mount.Name + " at " + mount.MountPoint);
         }
-        if(!File.Exists("/mnt/instLuviz.lze"))
+        if(!File.Exists("/mnt/LNXsys/System64/instLuviz.lze") && !File.Exists("/mnt/lnxOSpage.lua") && !File.Exists("/mnt/Users/lnchck"))
         {
             InstallService.part1();
-            // Console.BackgroundColor = ConsoleColor.Blue;
-            // Console.Clear();
 
-            // // using var reader = new StreamReader(resource);
-            // // string content = reader.ReadToEnd();
-            // // Console.WriteLine("Embedded file content: " + content);
-            // txtMgr.normal("=====LNX OS INSTALLER=====");
-            
-            // Console.WriteLine("You must have a nvme drive or achi drive for the setup to work");
-            // Console.WriteLine("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-            // Console.Write("\nF2 to start setup | Press F3 to reformat/format");
-            // ConsoleKeyInfo  key = Console.ReadKey(true);
-            // switch(key.Key)
-            // {
-            //     case ConsoleKey.F2:
-            //         try
-            //         {
-            //             Console.WriteLine("Starting setup...");
-            //             File.Create("/mnt/instLuviz.lze");
-            //             File.AppendAllText("/mnt/instLuviz.lze", "[systeminstall] = true");
-            //             Directory.CreateDirectory("/mnt/SysSetts/files");
-            //             File.AppendAllText("/mnt/LunDos.ini","[setup]\n");
-
-            //             //name
-            //             Console.Write("Type your name: ");
-            //             string user = Console.ReadLine().Trim();
-            //             File.AppendAllText("/mnt/LunDos.ini",$"username={user}\n");
-            
-            //             //filesystem
-            //             Console.Write("Default partition name:");
-            //             string Fs = Console.ReadLine().Trim();
-            //             File.AppendAllText("/mnt/LunDos.ini",$"FsName={Fs}\n");
-
-            //             Console.WriteLine("Setup completed. It is safe to reboot your pc. DO NOT REMOVE THE CD OR USB");
-            //             Power.Shutdown();
-            //         }
-            //         catch
-            //         {
-            //             Console.Clear();
-            //             Console.WriteLine("SYSTEM HALTED. Couldnt Setup your pc. Please restart and DO NOT REMOVE THE CD OR USB\nextra info: This may have happend because you didnt format your disk or\nit isnt supported") ;
-            //             Power.Shutdown();
-            //         }
-            //         break;
-            //     case ConsoleKey.F3:
-            //         try
-            //         {
-            //             Console.WriteLine("Starting formatting/reformmating...");
-            //             Console.WriteLine("Formatting /mnt/ partition...");
-            //             VfsManager.TryUnmount("/mnt");
-            //             FatFormatOptions options = new()
-            //             {
-            //                 Type = FatType.Fat32,
-            //                 VolumeLabel = $"COSMOS     ",
-            //             };
-
-            //             if (StorageManager.Partitions.Count == 0
-            //                 || !VfsManager.TryFormat("fat", StorageManager.Partitions[0], options))
-            //             {
-            //                 Console.WriteLine("Format failed");
-            //             }   
-            //             VfsManager.TryMount("fat", StorageManager.Partitions[0], MountFlags.None, "/mnt", out VfsManager.VfsMount? mountO);
-                    
-            //             Console.WriteLine("Formatting completed. It is safe to reboot your pc. DO NOT REMOVE THE CD OR USB");
-            //             Power.Shutdown();
-            //         }
-            //         catch
-            //         {
-            //             Console.Clear();
-            //             Console.WriteLine("SYSTEM HALTED. could not format your disk. Please restart and DO NOT REMOVE THE CD OR USB") ;
-            //             Power.Shutdown();
-            //         }
-
-                    
-            //         break;
-            //         case ConsoleKey.F4:
-            //         File.AppendAllText("/mnt/LunDos.ini",$"username=Native_LN_COSMOS\n");
-            //         Console.WriteLine("Starting envoriment");
-            //         Console.BackgroundColor = ConsoleColor.Black;
-            //         man = true;
-            //         break;
-            //         default:
-            //         Console.WriteLine("Couldnt install since you Didnt press f2 or f3 It is safe to reboot your pc. DO NOT REMOVE THE CD OR USB");
-            //         Power.Shutdown();
-            //         break;
-
+        }
+        if(!File.Exists("/mnt/LNXsys/System64/LunDos.ini"))
+        {
+            try
+            {
+                if(Directory.Exists("/mnt/LNXsys/System64"))
+                {
+                    File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini", "username=LN_KERNEL_RECOVERY");
+                }
+                else
+                {
+                    Directory.CreateDirectory("/mnt/LNXsys/System64");
+                    File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini", "username=LN_KERNEL_RECOVERY");
+                }
                 
-            // }
+            }
+            catch
+            {
+                UtilityLNX.Panic("Could not repair lundos.ini", "0x0000ef");
+            }
+            UtilityLNX.Panic("LunDos Is dead", "0xEa0FDf");
         }
         try
         {
-             Directory.SetCurrentDirectory("/mnt");
+             Directory.SetCurrentDirectory($"/mnt/Users/{username}");
         }
         catch
         {
@@ -167,29 +109,20 @@ public class Kernel : Sys.Kernel
             ulong totalBytes = stats.Blocks * stats.BlockSize;
             Console.WriteLine($"{freeBytes} bytes of hdd left [OK]");
         }
-        if(!File.Exists("/mnt/LunDos.ini"))
-        {
-            try
-            {
-                File.AppendAllText("/mnt/LunDos.ini", "username=LN_KERNEL_RECOVERY");
-            }
-            catch
-            {
-                UtilityLNX.Panic("Could not repair lundos.ini", "0x0000ef");
-            }
-            UtilityLNX.Panic("LunDos Is dead", "0xEa0FDf");
-        }
+
         Console.ForegroundColor = ConsoleColor.DarkGreen;
         Console.WriteLine("KERNEL booted successfully!");
         Console.WriteLine("tip: If you want to see all commands type 'help' and press enter.\nAlso This is a beta under Development ");
         if(guionboot == "true")
         {
             txtMgr.aprove("Gui on boot is true");
+            Desktop desktop = new Desktop();
+            desktop.launch();
         }
     }
     static int line = 0;
-    static string guionboot = UtilityLNX.ReadIni("/mnt/LunDos.ini","GuiOnBoot");
-    static string username = UtilityLNX.ReadIni("/mnt/LunDos.ini", "username");
+    static string guionboot = UtilityLNX.ReadIni("/mnt/LNXsys/System64/LunDos.ini","GuiOnBoot");
+    static public string username = UtilityLNX.ReadIni("/mnt/LNXsys/System64/LunDos.ini", "username");
     protected override void Run()
     {
 
@@ -204,7 +137,7 @@ public class Kernel : Sys.Kernel
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.Write($"{username}");
            
-            Console.Write($"@~ $ {Directory.GetCurrentDirectory()} > ");
+            Console.Write($"@:~{Directory.GetCurrentDirectory()} $ ");
         }
         catch
         {
@@ -228,6 +161,14 @@ public class Kernel : Sys.Kernel
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"Failed to create directory '{directory}'");
             }
+            return;
+        }
+        
+        else if(input.StartsWith("lua "))
+        {
+            string file = input.Split(" ")[1].Trim();
+            string arguments = input.Substring($"lua {file}".Length).Trim();
+            UtilityLNX.LNXLUA(file, arguments);
             return;
         }
         else if(input.StartsWith("cd "))
@@ -305,6 +246,12 @@ public class Kernel : Sys.Kernel
             Console.WriteLine(filename);
             return;
         }
+        else if(input.StartsWith("editor"))
+{
+            string filename = input.Substring(7);
+            editor.launch($"{Directory.GetCurrentDirectory()}/{filename}");
+            return;
+        }
         switch (input.ToLower())
         {
             case "reboot":
@@ -324,7 +271,8 @@ public class Kernel : Sys.Kernel
             break;
             case "gui":
                 txtMgr.error("Gui is on testing. Are you sure you want to start it?");
-                txtMgr.warn("Doenst work currently");
+                Desktop desktop = new Desktop();
+                desktop.launch();
             break;
             case "date":
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -362,9 +310,17 @@ public class Kernel : Sys.Kernel
 
             break;
             case "ls":
+                 if (VfsManager.TryStatFs("/mnt", out VfsStatFs stats))
+                {
+                    ulong freeBytes = stats.Bavail * stats.BlockSize;
+                    ulong totalBytes = stats.Blocks * stats.BlockSize;
+                    Console.WriteLine($"{freeBytes} of {totalBytes} On partiton\nCurrent directory: {Directory.GetCurrentDirectory()}");
+                }
             string[] files = Directory.GetFiles(Directory.GetCurrentDirectory());
             string[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory());
+          
             Console.ForegroundColor = ConsoleColor.Blue;
+            
             Console.Write("|Files| \n");
             foreach (string file in files)
             {
@@ -382,7 +338,7 @@ public class Kernel : Sys.Kernel
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Checking LnxOS ");
 
-            if(File.Exists("/mnt/LunDos.ini"))
+            if(File.Exists("/mnt/LNXsys/System64/LunDos.ini"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("LunDos.ini is healthy");
@@ -396,7 +352,7 @@ public class Kernel : Sys.Kernel
                 errors =+ 1;
 
             }
-             if(File.Exists("/mnt/instLuviz.lze"))
+             if(File.Exists("/mnt/LNXsys/System64/instLuviz.lze"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("instLuviz.lze is healthy");
@@ -409,17 +365,17 @@ public class Kernel : Sys.Kernel
                 Console.ForegroundColor = ConsoleColor.White;
                 errors =+ 1;
             }            
-            if(Directory.Exists("/mnt/SysSetts"))
+            if(Directory.Exists("/mnt/LNXsys"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("SysSetts is healthy!");
+                Console.WriteLine("LNXsys exists!!");
                 Console.ForegroundColor = ConsoleColor.White;
                 
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("SysSetts directory isnt healthy");
+                Console.WriteLine("LNXsys directory isnt healthy");
                 Console.ForegroundColor = ConsoleColor.White;
                 errors =+ 1;
             }
@@ -433,10 +389,33 @@ public class Kernel : Sys.Kernel
                 Console.WriteLine("Please press any key to restart");
 
                 Console.ReadKey();
-                if(File.Exists("/mnt/instLuviz.lze"))
+                if(File.Exists("/mnt/LNXsys/System64/instLuviz.lze"))
                 {
-                    File.Delete("/mnt/instLuviz.lze");
-                    File.Delete("/mnt/LunDos.ini");
+                    if(Directory.Exists("/mnt/LNXsys/System64"))
+                    {
+                        if(File.Exists("/mnt/LNXsys/System64/LunDos.ini"))
+                        {
+                            File.Delete("/mnt/LNXsys/System64/LunDos.ini");
+                        }
+                        if(File.Exists("/mnt/LNXsys/System64/instLuviz.lze"))
+                        {
+                            File.Delete("/mnt/LNXsys/System64/instLuviz.lze");
+                        }
+                        if(File.Exists("/mnt/users/lnchck"))
+                        {
+                            File.Delete("/mnt/Users/lnchck");
+                        }
+                        if(File.Exists("/mnt/lnxOSpage.lua"))
+                        {
+                            File.Delete("/mnt/lnxOSpage.lua");
+                        }
+                        Directory.Delete("/mnt/LNXsys/System64", true);
+                    }
+
+                    
+                   
+                    
+
                 }
                 Power.Reboot();
             break;
@@ -462,17 +441,24 @@ public class Kernel : Sys.Kernel
                 Console.WriteLine("  re-setup     - will ask you to reboot your computer and you will be taken to the setup");
                 Console.WriteLine("  lnkrnl -check     - checks LnxOS for any problems");
                 Console.WriteLine("  reboot     - Reboots the computer");
-                Console.WriteLine("  gui     - placeholder command for future beta-testing gui");
+                Console.WriteLine("  gui     - launches gui mode");
+                Console.WriteLine("  help-2     - shows more commands");
                 break;
+            case "help-2":
+                Console.WriteLine("  lua <path> <Extra arguments>     - Lua interpreter");
+                Console.WriteLine("  editor <path>     - File editor");
+                Console.WriteLine("  luaenv     - Shows the lua envoriment");
+            break;
+            case "luaenv":
+                UtilityLNX.luaenvoriment();
+            break;
+
             case "ver":
-                Console.WriteLine("Dev Test Thanks for trying this os");
+                UtilityLNX.LNXLUA("/mnt/LNXsys/bin/ver.lua", "");
             break;
             
             case "abt":
-             Console.WriteLine("Made by jsplashh");
-             Console.WriteLine("Simple but a little creative os");
-             Console.WriteLine("Kernel: lnkrnl\nKernel Achitecture: ln");
-             Console.WriteLine("Thanks for reading this and trying this");
+                UtilityLNX.LNXLUA("/mnt/LNXsys/bin/about.lua", "");
              //Console.WriteLine("Made on: Gen 3 v3.0.88 COSMOS");
             break;
             case "clear":
