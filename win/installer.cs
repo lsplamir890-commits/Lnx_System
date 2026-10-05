@@ -12,11 +12,16 @@ using Cosmos.Kernel.System.Diagnostics;
 using Cosmos.Kernel.System.Filesystems.Ext2;
 using lnkrnl;
 using System.Runtime.InteropServices;
+using Cosmos.Kernel.System.Graphics;
 namespace lnkrnl;
 public class InstallService
 {
+    
+    
     public static void part1()
     {
+       
+        
         while(true)
         {
             Console.CursorVisible = false;
@@ -29,9 +34,9 @@ public class InstallService
                 Console.BackgroundColor = ConsoleColor.Gray;    
             txtMgr.normal("=====LNX OS INSTALLER=====");
             Console.BackgroundColor = ConsoleColor.Blue;  
-            txtMgr.normal("You must have a nvme drive or achi drive for the setup to work");
+            txtMgr.normal("You must have a nvme drive or achi drive for the setup to work\nMinimum of a desktop of 1920x1080 resolution");
                 
-            txtMgr.normal("\n\nYou must press F2 or F3\nThis is a beta so expect bugs\nSome times it will break so much it may format your drive\nMade by jsplashh 2026 (C)\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+            txtMgr.normal("\n\nYou must press F2 or F3\nThis is a beta so expect bugs\nSome times it will break so much it may format your drive\nMade by jsplashh 2026 (C)\n\n\n\n\n\n\n\n\n\n\n\n\n");
             Console.BackgroundColor = ConsoleColor.Gray;  
             
             Console.Write("\nF2 to start setup | Press F3 reformat/format");
@@ -44,20 +49,34 @@ public class InstallService
                     {
                         Console.Clear();
                         txtMgr.normal("Starting setup...");
-                        File.Create("/mnt/instLuviz.lze");
-                        File.AppendAllText("/mnt/instLuviz.lze", "[systeminstall] = true");
-                        Directory.CreateDirectory("/mnt/SysSetts/files");
-                        File.AppendAllText("/mnt/LunDos.ini","[setup]\n");
+
+                        Directory.CreateDirectory("/mnt/LNXsys/System64");
+                        Directory.CreateDirectory("/mnt/LNXsys/bin");
+                        Directory.CreateDirectory("/mnt/LNXsys/Themes");
+                        Directory.CreateDirectory("/mnt/Users");
+                        Directory.CreateDirectory("/mnt/ProgramsX64");
+                        File.AppendAllBytes("/mnt/LNXsys/System64/cursor.png", EmbeddedResource.ReadBytes("lnkrnl.resources.Cursor.png"));
+                        File.AppendAllBytes("/mnt/LNXsys/System64/BootIcon.png", EmbeddedResource.ReadBytes("lnkrnl.resources.icon.png"));
+                        File.AppendAllBytes("/mnt/LNXsys/Themes/nebula.png", EmbeddedResource.ReadBytes("lnkrnl.resources.backround.png"));
+                      
+                        File.AppendAllText("/mnt/lnxOSpage.lua", $"print(\"check install\")\n");
+                        File.AppendAllText("/mnt/LNXsys/bin/about.lua", $"print(\"Made by jsplashh\")\nprint(\"Simple os but is good\")\nprint(\"Made by jsplashh \\nArchitecture and kernel: LN \")\n");
+                        File.AppendAllText("/mnt/LNXsys/bin/ver.lua", $"print(\"On dev\")\n");
+                        File.Create("/mnt/LNXsys/System64/instLuviz.lze");
+                        File.Create("/mnt/Users/lnchck");
+                        File.AppendAllText("/mnt/LNXsys/System64/instLuviz.lze", "[systeminstall] = true");
+                        
+                        File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini","[setup]\n");
 
                         //name
                         Console.Write("Type your name: ");
                         string user = Console.ReadLine().Trim();
-                        File.AppendAllText("/mnt/LunDos.ini",$"username={user}\n");
-                
+                        File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini",$"username={user}\n");
+                        Directory.CreateDirectory($"/mnt/Users/{user}");
                         //filesystem
                         Console.Write("Default partition name:");
                         string Fs = Console.ReadLine().Trim();
-                        File.AppendAllText("/mnt/LunDos.ini",$"FsName={Fs}\n");
+                        File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini",$"FsName={Fs}\n");
                         part2();    
                         txtMgr.aprove("Setup completed. It is safe to reboot your pc. DO NOT REMOVE THE CD OR USB");
                         Power.Shutdown();
@@ -78,7 +97,7 @@ public class InstallService
                         FatFormatOptions options = new()
                         {
                             Type = FatType.Fat32,
-                            VolumeLabel = $"COSMOS     ",
+                            VolumeLabel = $"LNXOSPART     ",
                         };
 
                         if (StorageManager.Partitions.Count == 0
@@ -101,6 +120,19 @@ public class InstallService
                         
                     break;
                     case ConsoleKey.F4:
+                        try
+                        {
+                            txtMgr.normal("Starting partitioning...");
+                            UtilityLNX.createpart();
+                        }
+                        catch
+                        {
+                            Console.Clear();
+                            txtMgr.warn("SYSTEM HALTED. could not partition your disk. Please restart and DO NOT REMOVE THE CD OR USB") ;
+                            Power.Shutdown();
+                        }
+                    break;
+                    case ConsoleKey.F5:
                     File.AppendAllText("/mnt/LunDos.ini",$"username=Native_LN_COSMOS\n");
                     txtMgr.normal("Starting envoriment");
                     Console.BackgroundColor = ConsoleColor.Black;
@@ -140,7 +172,7 @@ public class InstallService
                         selection1 = true;
                     break;
                     case ConsoleKey.Enter:
-                        File.AppendAllText("/mnt/LunDos.ini", "GuiOnBoot=false");
+                        File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini", "GuiOnBoot=false");
                         part3();
                     break;
                 }
@@ -158,7 +190,7 @@ public class InstallService
                         selection1 = false;
                     break;
                     case ConsoleKey.Enter:
-                        File.AppendAllText("/mnt/LunDos.ini", "GuiOnBoot=true");
+                        File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini", "GuiOnBoot=true");
                         part3();
                     break;
                 }

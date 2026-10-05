@@ -1,4 +1,4 @@
-//Dev of lnkrnl 0.7
+//Dev of lnxos 1
 using System;
 using Sys = Cosmos.Kernel.System;
 using System.IO;
