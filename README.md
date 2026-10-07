@@ -1,21 +1,11 @@
 # Lnx_System
-this is an os that was made using cosmos. You can pull request at any time. most bugs will be released on v1 development
 
-But yeah nothing else special
+> [!WARNING]
+> This is a work-in-progress, certain things may not work as expected.
+> If you know how to fix an issue, create a pull request!
 
-# COSMOS 
-Cosmos is a kit for C# os's like this one 
-| well this os was made in cosmos Cuz i was to lazy to set up linkers and a gdt and idt
+**Lnx_System** is an operating system made in Cosmos gen3.
 
-  Cosmos is a great project
+## License
 
-# Random
-If you steal this os and rebrand it and still call it your's, you will be on some trouble.
-You can publish an os containing some of this source code, but you must make a big change: Internal OR internal and visual code change
-
-# rules
-Dont brand it as yours.
-
-# other
-  This is experimental,
-  Date of release: 9/22/2026 0AM or 12pm
+This project is licensed under the GNU Affero General Public License v3.0, see the [LICENSE](LICENSE) file for more details.
