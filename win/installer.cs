@@ -108,7 +108,7 @@ public class InstallService
                         FatFormatOptions options = new()
                         {
                             Type = FatType.Fat32,
-                            VolumeLabel = $"COSMOS     ",
+                            VolumeLabel = "COSMOS     ",
                         };
 
                         if (StorageManager.Partitions.Count == 0
@@ -254,7 +254,7 @@ public class InstallService
                         selection1 = false;
                     break;
                     case ConsoleKey.Enter:
-                        File.AppendAllText("/mnt/LNXsys/system64/LunDos.ini","font=Reg\nfontPath=/mnt/LNXsys/Fonts/lol.ttf\n");
+                        File.AppendAllText("/mnt/LNXsys/system64/LunDos.ini","font=Reg\nfontPath=/mnt/LNXsys/Fonts/mainfont.ttf\n");
                         part4();
                     break;
                 }
@@ -271,7 +271,7 @@ public class InstallService
             txtMgr.normal("====LNX OS INSTALLER====");
             Console.BackgroundColor = ConsoleColor.Blue;
             txtMgr.normal("To navigate through the menu Just press 1 or 2\n");
-            txtMgr.normal("Do you want to reboot? (this is just filler)");
+            txtMgr.normal("Do you want to reboot?");
             if(!selection1 == true)
             {
                 Console.BackgroundColor = ConsoleColor.Blue;
