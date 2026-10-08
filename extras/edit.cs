@@ -36,8 +36,12 @@ public class editor
         Console.ForegroundColor = ConsoleColor.White;
         Console.Clear();
         Console.BackgroundColor = ConsoleColor.Gray;
-        txtMgr.normal( "FILE OVERWRITER | Type 'eeee' to exit");
+        txtMgr.normal( "FILE EDITOR | Press enter and Type 'eeee' to exit");
         Console.BackgroundColor = ConsoleColor.Black;
+        if(File.Exists(path))
+        {
+            txtMgr.normal(File.ReadAllText(path));
+        }
         while(true)
         {
             string text = Console.ReadLine();
