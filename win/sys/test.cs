@@ -26,13 +26,9 @@ using System.Drawing;
 using System.IO;
 using System.Numerics;
 using Cosmos.Kernel.System.Input;
-using lnkrnl;
-namespace lnkrnl;
-public class useless
+enum test
 {
-    public static void uselessthing()
-    {
-        txtMgr.error("You should'nt ");
-       
-    }
+    None,
+    Clicked,
+    Pressed
 }

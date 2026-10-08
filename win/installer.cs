@@ -1,18 +1,26 @@
+//Dev of lnxos 1
 using System;
 using Sys = Cosmos.Kernel.System;
 using System.IO;
 using Cosmos.Kernel.System.Storage;
-using Cosmos.Kernel.System.Vfs;
-using Cosmos.Kernel.System.Filesystems.Fat;
-using Cosmos.Kernel.HAL.Interfaces.Devices;
-using Cosmos.Kernel.HAL.Vfs;
+
+
+using Cosmos.Kernel.System.FileSystem.Fat;
+using Cosmos.Kernel.HAL.DriverKit;
+using Cosmos.Kernel.System.Sessions;
 using Cosmos.Kernel.System;
-using assembly = System.Reflection.Assembly;
+using Cosmos.Kernel.HAL.Devices;
 using Cosmos.Kernel.System.Diagnostics;
-using Cosmos.Kernel.System.Filesystems.Ext2;
+
 using lnkrnl;
 using System.Runtime.InteropServices;
+using Cosmos.Executable.Lua;
+using Mono.Cecil;
 using Cosmos.Kernel.System.Graphics;
+using Cosmos.Kernel.System.Graphics.Fonts;
+using System.IO;
+using Cosmos.Kernel.System.FileSystem;
+using Cosmos.Kernel.HAL.Devices.Storage;
 namespace lnkrnl;
 public class InstallService
 {
@@ -47,24 +55,27 @@ public class InstallService
                 case ConsoleKey.F2:
                     try
                     {
+                        
                         Console.Clear();
-                        txtMgr.normal("Starting setup...");
+                        txtMgr.normal("Copying files... This may take a second");
 
                         Directory.CreateDirectory("/mnt/LNXsys/System64");
                         Directory.CreateDirectory("/mnt/LNXsys/bin");
                         Directory.CreateDirectory("/mnt/LNXsys/Themes");
                         Directory.CreateDirectory("/mnt/Users");
+                        Directory.CreateDirectory("/mnt/LNXsys/Fonts");
                         Directory.CreateDirectory("/mnt/ProgramsX64");
                         File.AppendAllBytes("/mnt/LNXsys/System64/cursor.png", EmbeddedResource.ReadBytes("lnkrnl.resources.Cursor.png"));
                         File.AppendAllBytes("/mnt/LNXsys/System64/BootIcon.png", EmbeddedResource.ReadBytes("lnkrnl.resources.icon.png"));
                         File.AppendAllBytes("/mnt/LNXsys/Themes/nebula.png", EmbeddedResource.ReadBytes("lnkrnl.resources.backround.png"));
-                      
+                        File.AppendAllBytes("/mnt/LNXsys/Fonts/lol.ttf", EmbeddedResource.ReadBytes("lnkrnl.resources.comic.ttf"));
                         File.AppendAllText("/mnt/lnxOSpage.lua", $"print(\"check install\")\n");
                         File.AppendAllText("/mnt/LNXsys/bin/about.lua", $"print(\"Made by jsplashh\")\nprint(\"Simple os but is good\")\nprint(\"Made by jsplashh \\nArchitecture and kernel: LN \")\n");
                         File.AppendAllText("/mnt/LNXsys/bin/ver.lua", $"print(\"On dev\")\n");
                         File.Create("/mnt/LNXsys/System64/instLuviz.lze");
                         File.Create("/mnt/Users/lnchck");
                         File.AppendAllText("/mnt/LNXsys/System64/instLuviz.lze", "[systeminstall] = true");
+                        File.AppendAllBytes("/mnt/LNXsys/Fonts/mainfont.ttf",EmbeddedResource.ReadBytes("lnkrnl.resources.regular.ttf"));
                         
                         File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini","[setup]\n");
 
@@ -97,7 +108,7 @@ public class InstallService
                         FatFormatOptions options = new()
                         {
                             Type = FatType.Fat32,
-                            VolumeLabel = $"LNXOSPART     ",
+                            VolumeLabel = $"COSMOS     ",
                         };
 
                         if (StorageManager.Partitions.Count == 0
@@ -105,16 +116,17 @@ public class InstallService
                         {
                                 txtMgr.error("Format failed");
                         }   
-                        VfsManager.TryMount("fat", StorageManager.Partitions[0], MountFlags.None, "/mnt", out VfsManager.VfsMount? mountO);
+                        VfsManager.TryMount("fat", StorageManager.Partitions[0], MountFlags.None, "/mnt", out VfsMount? mount);
                         
                         txtMgr.aprove("Formatting completed. It is safe to reboot your pc. DO NOT REMOVE THE CD OR USB");
                         Power.Shutdown();
                     }
                     catch
                     {
-                        Console.Clear();
-                        txtMgr.warn("SYSTEM HALTED. could not format your disk. Please restart and DO NOT REMOVE THE CD OR USB") ; //yes i used warn instead of error
-                        Power.Shutdown();
+                        UtilityLNX.Panic("INSTALLER_FORMAT_FAIL","0x0e001");
+                        // Console.Clear();
+                        // txtMgr.warn("SYSTEM HALTED. could not format your disk. Please restart and DO NOT REMOVE THE CD OR USB") ; //yes i used warn instead of error
+                        // Power.Shutdown();
                     }
 
                         
@@ -154,7 +166,7 @@ public class InstallService
         {
             Console.Clear();
             Console.BackgroundColor = ConsoleColor.Gray;
-            txtMgr.normal("====MORE INFO BEFORE REBOOT====");
+            txtMgr.normal("====LNX OS INSTALLER====");
             Console.BackgroundColor = ConsoleColor.Blue;
             txtMgr.normal("To navigate through the menu Just press 1 or 2\n");
             txtMgr.normal("Do you want Gui on boot?");
@@ -172,7 +184,7 @@ public class InstallService
                         selection1 = true;
                     break;
                     case ConsoleKey.Enter:
-                        File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini", "GuiOnBoot=false");
+                        File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini", "GuiOnBoot=false\n");
                         part3();
                     break;
                 }
@@ -190,7 +202,7 @@ public class InstallService
                         selection1 = false;
                     break;
                     case ConsoleKey.Enter:
-                        File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini", "GuiOnBoot=true");
+                        File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini", "GuiOnBoot=true\n");
                         part3();
                     break;
                 }
@@ -200,12 +212,63 @@ public class InstallService
     }
     public static void part3()
     {
+         bool selection1 = true;
+        while(true)
+        {
+            Console.Clear();
+            Console.BackgroundColor = ConsoleColor.Gray;
+            txtMgr.normal("====LNX OS INSTALLER====");
+            Console.BackgroundColor = ConsoleColor.Blue;
+            txtMgr.normal("To navigate through the menu Just press 1 or 2\n");
+            txtMgr.normal("What font would you want for gui");
+            if(!selection1 == true)
+            {
+                Console.BackgroundColor = ConsoleColor.Blue;
+                txtMgr.normal("Regular font");
+                Console.BackgroundColor = ConsoleColor.Gray;
+                txtMgr.normal("Comic sans");
+                Console.BackgroundColor = ConsoleColor.Blue;
+                ConsoleKeyInfo key = Console.ReadKey(true);
+                switch(key.Key)
+                {
+                    case ConsoleKey.D1:
+                        selection1 = true;
+                    break;
+                    case ConsoleKey.Enter:
+                        File.AppendAllText("/mnt/LNXsys/system64/LunDos.ini","font=ComicSans\nfontPath=/mnt/LNXsys/Fonts/lol.ttf\n");
+                        part4();
+                    break;
+                    
+                }
+            }
+            else
+            {
+                Console.BackgroundColor = ConsoleColor.Gray;
+                txtMgr.normal("Regular font");
+                Console.BackgroundColor = ConsoleColor.Blue;
+                txtMgr.normal("Comic sans");
+                ConsoleKeyInfo key = Console.ReadKey(true);
+                switch(key.Key)
+                {
+                    case ConsoleKey.D2:
+                        selection1 = false;
+                    break;
+                    case ConsoleKey.Enter:
+                        File.AppendAllText("/mnt/LNXsys/system64/LunDos.ini","font=Reg\nfontPath=/mnt/LNXsys/Fonts/lol.ttf\n");
+                        part4();
+                    break;
+                }
+            }        
+        }
+    }
+    public static void part4()
+    {
         bool selection1 = true;
         while(true)
         {
             Console.Clear();
             Console.BackgroundColor = ConsoleColor.Gray;
-            txtMgr.normal("====MORE INFO BEFORE REBOOT====");
+            txtMgr.normal("====LNX OS INSTALLER====");
             Console.BackgroundColor = ConsoleColor.Blue;
             txtMgr.normal("To navigate through the menu Just press 1 or 2\n");
             txtMgr.normal("Do you want to reboot? (this is just filler)");

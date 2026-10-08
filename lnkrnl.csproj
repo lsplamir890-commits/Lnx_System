@@ -1,19 +1,23 @@
-<Project Sdk="Cosmos.Sdk/3.0.89">
+<Project Sdk="Cosmos.Sdk/3.0.91">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
+    <NoWarn>$(NoWarn);COSMOS0003</NoWarn>
   </PropertyGroup>
 
   <!-- Core kernel packages -->
   <ItemGroup>
     <EmbeddedResource Include="resources\Cursor.png" />
+    <EmbeddedResource Include="resources\comic.ttf" />
     <EmbeddedResource Include="resources\backround.png" />
     <EmbeddedResource Include="resources\icon.png" />
-     <PackageReference Include="Cosmos.Network.Http" Version="2.1.0" />
+    <EmbeddedResource Include="resources\dosFont.psf"/>
+    <EmbeddedResource Include="resources\regular.ttf"/>
+     <PackageReference Include="Cosmos.Network.Http" Version="3.0.0" />
     <PackageReference Include="Cosmos.Executable.Lua" Version="4.0.0" />
-    <PackageReference Include="Cosmos.Kernel" Version="3.0.89" />
-    <PackageReference Include="Cosmos.Kernel.System" Version="3.0.89" />
+    <PackageReference Include="Cosmos.Kernel" Version="3.0.91" />
+    <PackageReference Include="Cosmos.Kernel.System" Version="3.0.91" />
   </ItemGroup>
 
 </Project>

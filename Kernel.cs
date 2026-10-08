@@ -3,18 +3,30 @@ using System;
 using Sys = Cosmos.Kernel.System;
 using System.IO;
 using Cosmos.Kernel.System.Storage;
-using Cosmos.Kernel.System.Vfs;
-using Cosmos.Kernel.System.Filesystems.Fat;
-using Cosmos.Kernel.HAL.Interfaces.Devices;
-using Cosmos.Kernel.HAL.Vfs;
+
+
+using Cosmos.Kernel.System.FileSystem.Fat;
+using Cosmos.Kernel.HAL.DriverKit;
+using Cosmos.Kernel.System.Sessions;
 using Cosmos.Kernel.System;
-using assembly = System.Reflection.Assembly;
+using Cosmos.Kernel.HAL.Devices;
 using Cosmos.Kernel.System.Diagnostics;
-using Cosmos.Kernel.System.Filesystems.Ext2;
+
 using lnkrnl;
 using System.Runtime.InteropServices;
 using Cosmos.Executable.Lua;
 using Mono.Cecil;
+using Cosmos.Kernel.System.Graphics;
+using Cosmos.Kernel.System.Graphics.Fonts;
+using System.IO;
+using Cosmos.Kernel.System.FileSystem;
+using Cosmos.Kernel.HAL.Devices.Storage;
+using Cosmos.Kernel.System.Input.Layouts;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Numerics;
+using Cosmos.Kernel.System.Input;
 
 namespace lnkrnl;
 
@@ -30,27 +42,34 @@ public class Kernel : Sys.Kernel
 
     protected override void BeforeRun()
     {
-        
-
+         KernelConsole.Default.Font = PCScreenFont.LoadFont(EmbeddedResource.ReadBytes("lnkrnl.resources.dosFont.psf"));
+        ConsoleSession terminal = SessionManager.CreateVirtualConsole();
+        SessionManager.Start(terminal, ()=>
+            txtMgr.info("Started kernel")
+        );
+        txtMgr.warn($"the kernel terminal is at {terminal.Id}");
+        txtMgr.info("Loading disk");
         
         
         IBlockDevice? disk = StorageManager.PrimaryDevice;
-        FatFilesystemType fat = new();
+        FatFileSystemType fat = new();
 
-        if (!VfsManager.RegisterFilesystem("fat", fat))
+        if (!VfsManager.RegisterFileSystem("fat", fat))
         {
-            Console.WriteLine("The name \"fat\" is already registered.");
+            txtMgr.warn("The name \"fat\" is already registered.");
             return;
         }
-
+        txtMgr.info("rescanning partitions...");
         StorageManager.RescanPartitions(disk);
+        txtMgr.aprove("scanned partitions");
         if (StorageManager.Partitions.Count == 0)
         {
             
             Console.WriteLine("No partitions found.");
             try
             {
-                txtMgr.normal("Starting partitioning...");
+                txtMgr.error("COULDNT FIND ANY PARTITIONS");
+                txtMgr.info("press any key to create an partition and reboot");
                 UtilityLNX.createpart();
                 Power.Reboot();
             }
@@ -62,12 +81,14 @@ public class Kernel : Sys.Kernel
             }
             return;
         }
-        if (VfsManager.TryMount("fat", StorageManager.Partitions[0], MountFlags.None, "/mnt", out VfsManager.VfsMount? mount))
+        if (VfsManager.TryMount("fat", StorageManager.Partitions[0], MountFlags.None, "/mnt", out VfsMount? mount))
         {
-            Console.WriteLine("Mounted " + mount.Name + " at " + mount.MountPoint);
+
+            txtMgr.aprove("Mounted " + mount.Name + " at " + mount.MountPoint);
         }
         if(!File.Exists("/mnt/LNXsys/System64/instLuviz.lze") && !File.Exists("/mnt/lnxOSpage.lua") && !File.Exists("/mnt/Users/lnchck"))
         {
+            KernelConsole.Default.Font = PCScreenFont.DefaultFont;
             InstallService.part1();
 
         }
@@ -98,21 +119,24 @@ public class Kernel : Sys.Kernel
         }
         catch
         {
-            Console.WriteLine("Couldnt set the current directory to Primary partition");
+            txtMgr.error("Couldnt set the current directory to Primary partition");
         }
-        Console.WriteLine("Please wait..");
+        Console.Beep();
+        
+        
         Thread.Sleep(1500);
-        Console.Clear();
+       
+        
         if (VfsManager.TryStatFs("/mnt", out VfsStatFs stats))
         {
-            ulong freeBytes = stats.Bavail * stats.BlockSize;
+            ulong freeBytes = stats.BlockSize * stats.BlockSize;
+    
             ulong totalBytes = stats.Blocks * stats.BlockSize;
-            Console.WriteLine($"{freeBytes} bytes of hdd left [OK]");
+            txtMgr.info($"{freeBytes} bytes left");
         }
 
         Console.ForegroundColor = ConsoleColor.DarkGreen;
-        Console.WriteLine("KERNEL booted successfully!");
-        Console.WriteLine("tip: If you want to see all commands type 'help' and press enter.\nAlso This is a beta under Development ");
+        txtMgr.info("KERNEL booted successfully!");
         if(guionboot == "true")
         {
             txtMgr.aprove("Gui on boot is true");
@@ -144,7 +168,7 @@ public class Kernel : Sys.Kernel
             Console.Write("root@~ $ UNKNOWNDRIVE > ");
         }
         Console.ForegroundColor = ConsoleColor.White;
-        var input = Console.ReadLine().ToLower();
+        string? input = Console.ReadLine().ToLower();
 
         if (string.IsNullOrEmpty(input))
             return;
@@ -269,6 +293,21 @@ public class Kernel : Sys.Kernel
                     txtMgr.error("Could not collect the garbage");
                 }
             break;
+            case "test":
+                ConsoleSession session = SessionManager.CreateVirtualConsole();
+
+                SessionManager.Start(session, () =>
+                {
+                    SessionManager.Switch(session.Id);
+                    Console.WriteLine("Hello from " + session.Name);
+
+                    while (Console.ReadLine() is { } line)
+                    {
+                        Console.WriteLine("You typed: " + line);
+                    }
+                });
+
+            break;
             case "gui":
                 txtMgr.error("Gui is on testing. Are you sure you want to start it?");
                 Desktop desktop = new Desktop();
@@ -292,27 +331,17 @@ public class Kernel : Sys.Kernel
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Format failed");
                 }   
-                VfsManager.TryMount("fat", StorageManager.Partitions[0], MountFlags.None, "/mnt", out VfsManager.VfsMount? mount);
+                VfsManager.TryMount("fat", StorageManager.Partitions[0], MountFlags.None, "/mnt", out VfsMount? mount);
                 
             break;
             case "ext2":
                 Newshell.Launch();
             break;
-            case "maketestfile":
-            try
-            {
-                using FileStream stream = File.Create("/mnt/testing.txt");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-
-            break;
+            
             case "ls":
                  if (VfsManager.TryStatFs("/mnt", out VfsStatFs stats))
                 {
-                    ulong freeBytes = stats.Bavail * stats.BlockSize;
+                    ulong freeBytes = stats.BlockSize * stats.BlockSize;
                     ulong totalBytes = stats.Blocks * stats.BlockSize;
                     Console.WriteLine($"{freeBytes} of {totalBytes} On partiton\nCurrent directory: {Directory.GetCurrentDirectory()}");
                 }
@@ -409,7 +438,7 @@ public class Kernel : Sys.Kernel
                         {
                             File.Delete("/mnt/lnxOSpage.lua");
                         }
-                        Directory.Delete("/mnt/LNXsys/System64", true);
+                        Directory.Delete("/mnt/LNXsys", true);
                     }
 
                     
