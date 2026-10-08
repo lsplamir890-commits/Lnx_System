@@ -27,6 +27,8 @@ using System.Drawing;
 using System.IO;
 using System.Numerics;
 using Cosmos.Kernel.System.Input;
+using Cosmos.Kernel.Drivers.Usb.Storage;
+using Cosmos.Kernel.HAL.DriverKit.Buses.Usb;
 
 namespace lnkrnl;
 
@@ -42,16 +44,22 @@ public class Kernel : Sys.Kernel
 
     protected override void BeforeRun()
     {
+
          KernelConsole.Default.Font = PCScreenFont.LoadFont(EmbeddedResource.ReadBytes("lnkrnl.resources.dosFont.psf"));
         ConsoleSession terminal = SessionManager.CreateVirtualConsole();
         SessionManager.Start(terminal, ()=>
             txtMgr.info("Started kernel")
         );
+        txtMgr.aprove("Started kernel with no problems yet");
+        txtMgr.warn("This is a beta");
+        txtMgr.info("Starting load sequence");
+        
         txtMgr.warn($"the kernel terminal is at {terminal.Id}");
         txtMgr.info("Loading disk");
         
         
         IBlockDevice? disk = StorageManager.PrimaryDevice;
+       
         FatFileSystemType fat = new();
 
         if (!VfsManager.RegisterFileSystem("fat", fat))
@@ -62,6 +70,7 @@ public class Kernel : Sys.Kernel
         txtMgr.info("rescanning partitions...");
         StorageManager.RescanPartitions(disk);
         txtMgr.aprove("scanned partitions");
+        txtMgr.info($"The main mount is: {disk.Name}");
         if (StorageManager.Partitions.Count == 0)
         {
             
@@ -70,6 +79,7 @@ public class Kernel : Sys.Kernel
             {
                 txtMgr.error("COULDNT FIND ANY PARTITIONS");
                 txtMgr.info("press any key to create an partition and reboot");
+                Console.ReadKey();
                 UtilityLNX.createpart();
                 Power.Reboot();
             }
@@ -86,6 +96,7 @@ public class Kernel : Sys.Kernel
 
             txtMgr.aprove("Mounted " + mount.Name + " at " + mount.MountPoint);
         }
+        
         if(!File.Exists("/mnt/LNXsys/System64/instLuviz.lze") && !File.Exists("/mnt/lnxOSpage.lua") && !File.Exists("/mnt/Users/lnchck"))
         {
             KernelConsole.Default.Font = PCScreenFont.DefaultFont;
@@ -121,6 +132,7 @@ public class Kernel : Sys.Kernel
         {
             txtMgr.error("Couldnt set the current directory to Primary partition");
         }
+        txtMgr.aprove("Succesfully loaded with no problems");
         Console.Beep();
         
         
@@ -136,7 +148,7 @@ public class Kernel : Sys.Kernel
         }
 
         Console.ForegroundColor = ConsoleColor.DarkGreen;
-        txtMgr.info("KERNEL booted successfully!");
+        txtMgr.customNL(ConsoleColor.DarkBlue,"KERNEL booted successfully!");
         if(guionboot == "true")
         {
             txtMgr.aprove("Gui on boot is true");
@@ -272,9 +284,17 @@ public class Kernel : Sys.Kernel
         }
         else if(input.StartsWith("editor"))
 {
-            string filename = input.Substring(7);
-            editor.launch($"{Directory.GetCurrentDirectory()}/{filename}");
-            return;
+            try
+            {
+                string filename = input.Substring(7);
+                editor.launch($"{Directory.GetCurrentDirectory()}/{filename}");
+                return;
+            } 
+            catch
+            {
+                txtMgr.error("Failed to launch the editor");
+            }
+
         }
         switch (input.ToLower())
         {
@@ -500,8 +520,7 @@ public class Kernel : Sys.Kernel
                 break;
             
             default:
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Shell Failed at line:{line}: \"{input}\" is not a command");
+                txtMgr.error($"Shell Failed at line:{line}: \"{input}\" is not a command");
                 break;
             
         }
