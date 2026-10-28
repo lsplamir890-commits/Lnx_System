@@ -1,0 +1,5 @@
+EXPORT void test()
+{
+
+    return;
+}

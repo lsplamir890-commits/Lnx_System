@@ -1,14 +1,37 @@
-<Project Sdk="Cosmos.Sdk/3.0.88">
+<Project Sdk="Cosmos.Sdk/3.0.95">
 
   <PropertyGroup>
+    
+    <CosmosKernelClass>lnkrnl.boot</CosmosKernelClass>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
+    <NoWarn>$(NoWarn);COSMOS0003</NoWarn>
   </PropertyGroup>
 
   <!-- Core kernel packages -->
   <ItemGroup>
-    <PackageReference Include="Cosmos.Kernel" Version="3.0.88" />
-    <PackageReference Include="Cosmos.Kernel.System" Version="3.0.88" />
+    <EmbeddedResource Include="resources\Cursor.png" />
+    <EmbeddedResource Include="resources\comic.ttf" />
+    <EmbeddedResource Include="resources\coolwallpaper.png" />
+    <EmbeddedResource Include="resources\rectangle.png" />
+    <EmbeddedResource Include="resources\icon.png" />
+    <EmbeddedResource Include="resources\dosFont.psf"/>
+    <EmbeddedResource Include="resources\regular.ttf"/>
+    <EmbeddedResource Include="resources\error.png"/>
+    <EmbeddedResource Include="resources\warn.png"/>
+    <EmbeddedResource Include="resources\info.png"/>
+    <EmbeddedResource Include="resources\coolmusic.wav"/>
+    <EmbeddedResource Include="resources\logo.png"/>
+    <EmbeddedResource Include="resources\pfp.png"/>
+
+    <EmbeddedResource Include="resources\limine-bios.sys"/>
+    <EmbeddedResource Include="resources\BOOTX64.EFI"/>
+    <EmbeddedResource Include="resources\limine.conf"/>
+    <EmbeddedResource Include="resources\lnkrnl.elf"/>
+     <PackageReference Include="Cosmos.Network.Http" Version="3.0.0" />
+    <PackageReference Include="Cosmos.Executable.Lua" Version="4.0.1" />
+    <PackageReference Include="Cosmos.Kernel" Version="3.0.95" />
+    <PackageReference Include="Cosmos.Kernel.System" Version="3.0.95" />
   </ItemGroup>
 
 </Project>
