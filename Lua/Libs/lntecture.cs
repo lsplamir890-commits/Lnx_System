@@ -27,9 +27,11 @@ using System.IO;
 using System.Numerics;
 using Cosmos.Kernel.System.Input;
 using System.Security.AccessControl;
+using lnkrnl.win.gui;
 namespace lnkrnl;
 public class LuaLibs
 {
+    public static lunwm dwm = new lunwm();
     public static void add(ILuaState inter, CSharpFunctionDelegate function, string name)
     {
         inter.PushCSharpFunction(function);
@@ -48,6 +50,16 @@ public class LuaLibs
         add(state,error,"error");
         add(state,clear,"ln_clear");
         add(state,listfolder,"ln_ls");
+        add(state,WINMGRCREATE,"lunwm_create");
+    }
+    public static int WINMGRCREATE(ILuaState luaSTS)
+    {
+        var name = luaSTS.L_CheckString(1);
+        var width = luaSTS.L_CheckInteger(2);
+        var height = luaSTS.L_CheckInteger(3);
+        dwm.Generate(Desktop.rect,(int)width,(int)height,name);
+        return 0;
+
     }
     public static int listfolder(ILuaState luaSTS)
     {

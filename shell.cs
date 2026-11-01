@@ -4,7 +4,7 @@ using Sys = Cosmos.Kernel.System;
 using System.IO;
 using Cosmos.Kernel.System.Storage;
 
-
+using Cosmos.Network.Telnet;
 using Cosmos.Kernel.System.FileSystem.Fat;
 using Cosmos.Kernel.HAL.DriverKit;
 using Cosmos.Kernel.System.Sessions;
@@ -43,7 +43,7 @@ public class mainKrn
     static bool man = false;
     static string DefaultPartName = UtilityLNX.ReadIni("/mnt/LNXsys/System64/LunDos.ini", "FsName");
 
-    public static GuiData guiLauncher = new GuiData();
+   
     static public void launch()
     {
         taskMgr.end("Minimal:subsystem:boot:syskern");
@@ -69,7 +69,8 @@ public class mainKrn
         {
             txtMgr.aprove("Gui on boot is true");
 
-            guiLauncher.IfSupportedInitGui();
+            InterfaceDevice.InitDesktopDriver();
+            Guinvas.init();
         }
         CliShell();
     }
@@ -84,7 +85,16 @@ public class mainKrn
 
         while (true)
         {
+            TelnetServer server = new(session =>
+            {
+                txtMgr.aprove("TELNET COMMUNICATING TO SESSION " + session.Name);
 
+                txtMgr.info("YOU WILL BE PROMPTED FOR A PASSWORD SHORTLY");
+                UtilityLNX.Chckpass();
+                txtMgr.info("SHELL EXECUTING...");
+                mainKrn.launch();
+            });
+            server.Start();
             line++;
 
             try
@@ -349,17 +359,20 @@ public class mainKrn
                     });
 
                     break;
-                case "testgui":
-                    txtMgr.normal("Supported modes are:");
-                    if (GuiData.HDIsSupported())
-                    {
-                        txtMgr.aprove("Gui is supported!");
-                    }
+                case "display":
+                    txtMgr.normal("starting display drivers");
+                    InterfaceDevice.InitDesktopDriver();
                     break;
                 case "gui":
                    
-                    guiLauncher.IfSupportedInitGui();
+                    Guinvas.init();
                     break;
+                case "update":
+                    File.Delete("/mnt/boot/lnkrnl.elf");
+                    Directory.Delete("/mnt/lnxsys", true);
+                    Directory.Delete("/efi/EFI",true);
+                    txtMgr.aprove("reboot with the usb plugged in");
+                break;
                 case "date":
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine($"{DateTime.Now}");
@@ -373,55 +386,6 @@ public class mainKrn
 
                 case "ls":
                     UtilityLNX.listfolder();
-                    break;
-                case "lnkrnl -check":
-                    int errors = 0;
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine("Checking LnxOS ");
-
-                    if (File.Exists("/mnt/LNXsys/System64/LunDos.ini"))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("LunDos.ini is healthy");
-                        Console.ForegroundColor = ConsoleColor.White;
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("LunDos.ini Doesnt exist or its corrupted");
-                        Console.ForegroundColor = ConsoleColor.White;
-                        errors = +1;
-
-                    }
-                    if (File.Exists("/mnt/LNXsys/System64/instLuviz.lze"))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("instLuviz.lze is healthy");
-                        Console.ForegroundColor = ConsoleColor.White;
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("instLuviz.lze Doesnt exist or its corrupted");
-                        Console.ForegroundColor = ConsoleColor.White;
-                        errors = +1;
-                    }
-                    if (Directory.Exists("/mnt/LNXsys"))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("LNXsys exists!!");
-                        Console.ForegroundColor = ConsoleColor.White;
-
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("LNXsys directory isnt healthy");
-                        Console.ForegroundColor = ConsoleColor.White;
-                        errors = +1;
-                    }
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"There are: {errors}. \nIf theres any errors Please fix your installation");
                     break;
                 case "re-setup":
                     Console.BackgroundColor = ConsoleColor.Blue;
