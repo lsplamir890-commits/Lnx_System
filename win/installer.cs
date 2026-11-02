@@ -80,7 +80,7 @@ public class InstallService
                         Console.Clear();
 
                         Console.BackgroundColor = ConsoleColor.Gray;
-                        txtMgr.normal("=====LNX OS 1 INSTALLER=====\n\n\n\n");
+                        txtMgr.normal("=====LNX OS 1 INSTALLER=====\nLnxOS started installing \n\n");
                         Console.BackgroundColor = ConsoleColor.Blue;
                         txtMgr.normal("                        [---------------]");
                         txtMgr.normal("                     making directory strucutre");
@@ -94,7 +94,7 @@ public class InstallService
                         Directory.CreateDirectory("/mnt/LNXsys/Fonts");
                         Directory.CreateDirectory("/mnt/ProgramsX64");
                         Console.BackgroundColor = ConsoleColor.Gray;
-                        txtMgr.normal("=====LNX OS 1 INSTALLER=====\n\n\n\n");
+                        txtMgr.normal("=====LNX OS 1 INSTALLER=====\nLnx os is installing extra stuff\n\n");
                         Console.BackgroundColor = ConsoleColor.Blue;
                         txtMgr.normal("                        [####-----------]");
                         txtMgr.normal("                    installing fonts, wallpaper and cursor");
@@ -105,7 +105,7 @@ public class InstallService
                         File.AppendAllBytes("/mnt/LNXsys/Themes/nebula.png", EmbeddedResource.ReadBytes("lnkrnl.resources.aeropaper.png")); //3
                         File.AppendAllBytes("/mnt/LNXsys/Fonts/lol.ttf", EmbeddedResource.ReadBytes("lnkrnl.resources.comic.ttf")); // 4
                         Console.BackgroundColor = ConsoleColor.Gray;
-                        txtMgr.normal("=====LNX OS 1 INSTALLER=====\n\n\n\n");
+                        txtMgr.normal("=====LNX OS 1 INSTALLER=====\nLNX Os is installing important stuff...");
                         Console.BackgroundColor = ConsoleColor.Blue;
                         txtMgr.normal("                        [#########-------]");
                         txtMgr.normal("                       installing extra png's");
@@ -117,7 +117,7 @@ public class InstallService
                         File.AppendAllBytes("/mnt/LNXsys/System64/info.png", EmbeddedResource.ReadBytes("lnkrnl.resources.info.png")); // 8
                         Console.Clear();
                         Console.BackgroundColor = ConsoleColor.Gray;
-                        txtMgr.normal("=====LNX OS 1 INSTALLER=====\n\n\n\n");
+                        txtMgr.normal("=====LNX OS 1 INSTALLER=====\nfunfact: LNXOS is trying to be like windows but not quite");
                         Console.BackgroundColor = ConsoleColor.Blue;
                         txtMgr.normal("                         [#############--]");
                         txtMgr.normal("         installing bootloader, kernel and final resources");
@@ -132,7 +132,7 @@ public class InstallService
                         File.AppendAllText("/mnt/LNXsys/System64/LunDos.ini", "[setup]\n");
                         LimineInstaller();
                         Console.BackgroundColor = ConsoleColor.Gray;
-                        txtMgr.normal("=====LNX OS 1 INSTALLER=====\n\n\n\n");
+                        txtMgr.normal("=====LNX OS 1 INSTALLER=====\n installer finished :)))))))))");
                         Console.BackgroundColor = ConsoleColor.Blue;
                         txtMgr.normal("                         [###############]");
                         txtMgr.normal("                         installer is done  ");
@@ -186,7 +186,7 @@ public class InstallService
         Console.BackgroundColor = ConsoleColor.Blue;
         Console.Clear();
         Console.BackgroundColor = ConsoleColor.Gray;
-        txtMgr.normal("=====LNX OS 1 OBEE=====\n\n\n\n");
+        txtMgr.normal("=====LNX OS 1 OBEE=====\nObee will help you set up your computer and make it ready for use");
         Console.BackgroundColor = ConsoleColor.Blue;
         Console.Write("Type your name: ");
         string user = Console.ReadLine().Trim();
@@ -207,7 +207,7 @@ public class InstallService
         {
             Console.Clear();
             Console.BackgroundColor = ConsoleColor.Gray;
-            txtMgr.normal("=====LNX OS 1 OBEE=====\n\n\n\n");
+            txtMgr.normal("=====LNX OS 1 OBEE=====\nObee will help you set up your computer and make it ready for use");
             Console.BackgroundColor = ConsoleColor.Blue;
             txtMgr.normal("To navigate through the menu Just press 1 or 2\n");
             txtMgr.normal("Do you want Gui on boot?");
@@ -259,7 +259,7 @@ public class InstallService
         {
             Console.Clear();
             Console.BackgroundColor = ConsoleColor.Gray;
-            txtMgr.normal("====LNX OS OBEE===="); //third. Like why???
+            txtMgr.normal("====LNX OS OBEE====\nObee will help you set up your computer and make it ready for use"); //third. Like why???
             Console.BackgroundColor = ConsoleColor.Blue;
             txtMgr.normal("To navigate through the menu Just press 1 or 2\n");
             txtMgr.normal("What font would you want for gui");
@@ -310,7 +310,7 @@ public class InstallService
         {
             Console.Clear();
             Console.BackgroundColor = ConsoleColor.Gray;
-            txtMgr.normal("====LNX OS OBEE====");
+            txtMgr.normal("====LNX OS OBEE====\nObee will help you set up your computer and make it ready for use");
             Console.BackgroundColor = ConsoleColor.Blue;
             txtMgr.normal("To navigate through the menu Just press 1 or 2\n");
             txtMgr.normal("Do you want to reboot?");
