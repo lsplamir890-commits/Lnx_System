@@ -34,6 +34,7 @@ public class Desktop
     static public Png rect = new Png(EmbeddedResource.ReadBytes("lnkrnl.resources.rectangle.png"));
     static public Png applogo = new Png(EmbeddedResource.ReadBytes("lnkrnl.resources.logo.png"));
     static public Png pfp = new Png(EmbeddedResource.ReadBytes("lnkrnl.resources.pfp.png"));
+    static public Png aero = new Png(EmbeddedResource.ReadBytes("lnkrnl.resources.aerorender.png"));
     static public string fontPath = UtilityLNX.ReadIni("/mnt/LNXsys/System64/LunDos.ini","fontPath");
     static public Png cursor = new Png("/mnt/LNXsys/System64/cursor.png");
     static public Png icon = new Png("/mnt/LNXsys/System64/BootIcon.png");
@@ -66,6 +67,7 @@ public class Desktop
                 
                 
             }
+            YFilesPoss = 109; 
             //new Window.Wim().window(500,500,"test window",rect, canvas);
             // widgets.Button(0,0,100,50, ()=> 
             //     Power.Reboot()
