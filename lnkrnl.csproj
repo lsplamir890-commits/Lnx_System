@@ -1,16 +1,18 @@
-<Project Sdk="Cosmos.Sdk/3.0.95">
+<Project Sdk="Cosmos.Sdk/3.0.97">
 
   <PropertyGroup>
-    
+    <!-- <AssemblyName>NewElf.Kernel</AssemblyName> -->
     <CosmosKernelClass>lnkrnl.boot</CosmosKernelClass>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <NoWarn>$(NoWarn);COSMOS0003</NoWarn>
+     <NoWarn>$(NoWarn);COSMOS0003</NoWarn>
   </PropertyGroup>
 
   <!-- Core kernel packages -->
   <ItemGroup>
-    <EmbeddedResource Include="resources\Cursor.png" />
+    <!-- <DirectPInvoke Include="initC" /> -->
+    
+    <!-- <EmbeddedResource Include="resources\Cursor.png" />
     <EmbeddedResource Include="resources\comic.ttf" />
     <EmbeddedResource Include="resources\coolwallpaper.png" />
     <EmbeddedResource Include="resources\rectangle.png" />
@@ -23,15 +25,22 @@
     <EmbeddedResource Include="resources\coolmusic.wav"/>
     <EmbeddedResource Include="resources\logo.png"/>
     <EmbeddedResource Include="resources\pfp.png"/>
-
-    <EmbeddedResource Include="resources\limine-bios.sys"/>
-    <EmbeddedResource Include="resources\BOOTX64.EFI"/>
+    <EmbeddedResource Include="resources\patata.exe"/> -->
+    <EmbeddedResource Include="resources\*"/> 
+    <!-- <EmbeddedResource Include="resources\limine-bios.sys"/>
+    <EmbeddedResource Include="resources\BOOTX64.EFI  
     <EmbeddedResource Include="resources\limine.conf"/>
-    <EmbeddedResource Include="resources\lnkrnl.elf"/>
+   
+    <EmbeddedResource Include="resources\aeropaper.png"/>
+    <EmbeddedResource Include="resources\aerorender.png"/> -->
+    <!-- <EmbeddedResource Include="resources\lnkrnl.elf"/> -->
+    <GCCProject Include="src\\c\\" />
+    <PackageReference Include="Cosmos.Network.Telnet" Version="1.0.0" />
      <PackageReference Include="Cosmos.Network.Http" Version="3.0.0" />
     <PackageReference Include="Cosmos.Executable.Lua" Version="4.0.1" />
-    <PackageReference Include="Cosmos.Kernel" Version="3.0.95" />
-    <PackageReference Include="Cosmos.Kernel.System" Version="3.0.95" />
+    <PackageReference Include="Cosmos.Kernel" Version="3.0.97" />
+    <PackageReference Include="Cosmos.Kernel.System" Version="3.0.97" />
+    
   </ItemGroup>
 
 </Project>
