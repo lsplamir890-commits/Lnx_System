@@ -141,12 +141,88 @@ public class UtilityLNX
             Console.WriteLine($"{dir.Split(Directory.GetCurrentDirectory() + "/")[1]}");
         }
     }
-    public static void Format(int PartId, string MountPath)
+    public static void Format(int id,string MountPath, IBlockDevice? disk)
     {
+        //int ind = 1;
+        IReadOnlyList<Partition> partitions = StorageManager.GetPartitions(disk);
+        bool isOnLoop = true;
         try
         {
             Console.BackgroundColor = ConsoleColor.Blue;
             Console.Clear();
+
+            // while(true)
+            // {
+
+            //     int inx = 1;
+            //     if(inx == 1)
+            //     {
+            //         Console.Clear();
+            //         txtMgr.normal($"====LNXOS PARTITION MANAGER====\nThis will help select the partition to format your drive");
+            //         if(partitions[inx] == null)
+            //         {
+            //             txtMgr.error($"Partition {inx} is null and is required for formatting.");
+            //             halt();
+            //         }
+            //         txtMgr.normal($"[>] Partition {partitions[0].Name}");
+            //         if(partitions[1] != null)txtMgr.normal($"[ ] Partition {partitions[1].Name}");
+            //         if(partitions[2] != null)txtMgr.normal($"[>] Partition {partitions[2].Name}");
+            //         ConsoleKeyInfo key = Console.ReadKey(true);
+            //         if(key.Key == ConsoleKey.Enter)
+            //         {
+            //             NoPromptFormat("LNXOS", inx, MountPath, MountIt:true);
+            //             halt();
+            //         }
+            //         if(key.Key == ConsoleKey.DownArrow)
+            //         {
+            //             inx++;
+            //         }
+                    
+            //     }
+            //     else if(inx == 2)
+            //     {
+            //         Console.Clear();
+            //         txtMgr.normal($"[ ] Partition {partitions[0].Name}");
+
+            //         if(partitions[1] != null)txtMgr.normal($"[ ] Partition {partitions[1].Name}");
+            //         if(partitions[2] != null)txtMgr.normal($"[>] Partition {partitions[2].Name}");
+
+            //         ConsoleKeyInfo key = Console.ReadKey(true);
+            //         if(key.Key == ConsoleKey.Enter && partitions[1] != null)
+            //         {
+            //             NoPromptFormat("LNXOS", inx, MountPath, MountIt:true);
+            //             halt();
+            //         }
+            //         if(key.Key == ConsoleKey.UpArrow)
+            //         {
+            //             inx--;
+            //         }
+            //         if(key.Key == ConsoleKey.DownArrow)
+            //         {
+            //             inx++;
+            //         }
+            //     }
+            //     else
+            //     {
+            //         txtMgr.normal($"[ ] Partition {partitions[inx].Name}");
+            //         if(partitions[1] != null)txtMgr.normal($"[ ] Partition {partitions[1].Name}");
+            //         if(partitions[2] != null)txtMgr.normal($"[>] Partition {partitions[2].Name}");
+            //         ConsoleKeyInfo key = Console.ReadKey(true);
+            //         if(key.Key == ConsoleKey.Enter &&  partitions[2] != null)
+            //         {
+            //             NoPromptFormat("LNXOS", inx, MountPath, MountIt:true);
+            //             halt();
+            //         }
+            //         if(key.Key == ConsoleKey.UpArrow)
+            //         {
+            //             inx--;
+            //         }
+            //     }
+                
+                
+            // }
+
+            
             txtMgr.normal("Starting formatting/reformmating...");
             txtMgr.normal("Formatting /mnt/ partition...");
             Console.Write("PARTITION NAME: ");
@@ -159,18 +235,18 @@ public class UtilityLNX
             };
 
             if (StorageManager.Partitions.Count == 0
-                    || !VfsManager.TryFormat("fat", StorageManager.Partitions[PartId], options))
+                    || !VfsManager.TryFormat("fat", StorageManager.Partitions[id], options))
             {
                 txtMgr.error("Format failed");
             }
-            VfsManager.TryMount("fat", StorageManager.Partitions[PartId], MountFlags.None, MountPath, out VfsMount? mount);
+            VfsManager.TryMount("fat", StorageManager.Partitions[id], MountFlags.None, MountPath, out VfsMount? mount);
 
             txtMgr.aprove("Formatting completed. It is safe to reboot your pc. DO NOT REMOVE THE CD OR USB");
             UtilityLNX.halt();
         }
         catch
         {
-            UtilityLNX.Panic("INSTALLER_FORMAT_FAIL", "0x0e001");
+            UtilityLNX.Panic("INSTALLER_FORMAT_FAIL", 0x0e001);
         }
     }
     public static void NoPromptFormat(string name, int partition,string mountpath, bool MountIt = false)
@@ -193,7 +269,7 @@ public class UtilityLNX
         }
         catch
         {
-            UtilityLNX.Panic("INSTALLER_FORMAT_FAIL", "0x0e001");
+            UtilityLNX.Panic("INSTALLER_FORMAT_FAIL", 0x0e001);
         }
     }
 
@@ -243,7 +319,7 @@ public class UtilityLNX
         else
         {
             StorageManager.RescanPartitions(disk);
-            UtilityLNX.Format(1, "/mnt");
+            UtilityLNX.Format(1,"/mnt",disk);
         }
                 //Gpt.AddPartition(disk,2048,131072, Guid.NewGuid());
        
@@ -252,7 +328,7 @@ public class UtilityLNX
         
     }
 
-    public static void Panic(string text, string id)
+    public static void Panic(string text, long id)
     {
        
         try
@@ -262,34 +338,14 @@ public class UtilityLNX
                     Console.CursorVisible = false;
                     Console.BackgroundColor = ConsoleColor.Blue;
                     Console.Clear();
-                    Console.BackgroundColor = ConsoleColor.Black;
-                    txtMgr.normal("YOUR PC HAS CRASHED \n");
-                    Console.BackgroundColor = ConsoleColor.Blue;
-                    txtMgr.normal("a problem has occurred that caused the system to stop\n\n");
-                    txtMgr.normal("For future use, a log file has been made");
-                    if(Directory.Exists("/mnt/LNXsys") && !panic_inpanic)
-                    {
+                    txtMgr.normal($"{text} at {id}");
+                    txtMgr.normal($"Fatal!");
+                    txtMgr.normal("a fatal problem has occured on the kernel\nAnd it has been stopped for your computer safety\n");
+                    txtMgr.normal("Writing a log\n\n");
+                    txtMgr.normal("0%");
                     File.AppendAllText("/mnt/LNXsys/Panic.log", $"BSOD at {DateTime.Now}, Name: {text}, ERROR code:{id}\n");
-                    } else
-                    {
-                        if(!panic_inpanic)
-                        {
-                            Console.WriteLine("Panic on panic");
-                        }
-                        else
-                        {
-                            Directory.CreateDirectory("/mnt/LNXsys");
-                            Console.WriteLine("Failed to make the panic.log file");
-                        }
-
-                    }
-                    panic_inpanic = true;
-                    txtMgr.error("ERROR CODE ID:");
-                    txtMgr.customNL(ConsoleColor.DarkRed, $"{id}\n\n");
-                    txtMgr.error($"ERROR CODE NAME:");
+                    txtMgr.normal("100%");
                     
-                    txtMgr.customNL(ConsoleColor.DarkRed, $"{text}\n\n");
-                    txtMgr.aprove($"IT IS SAFE TO REBOOT NOW OR WAIT 5 SECONDS[{text},{id}]");
                     Thread.Sleep(5000);
                     Power.Reboot(); 
         } 
