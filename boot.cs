@@ -33,7 +33,7 @@ using System.Net.Sockets;
 using System.Text;
 using Cosmos.Kernel.System.Network;
 using Cosmos.Kernel.System.Timers;
-
+using Cosmos.Native;
 using lnkrnl.win.gui;
 namespace lnkrnl;
 public class boot : Sys.Kernel
@@ -47,6 +47,7 @@ public class boot : Sys.Kernel
     } 
    
      static public string username = UtilityLNX.ReadIni("/mnt/LNXsys/System64/LunDos.ini", "username");
+     static public bool wifiLoaded = false;
     protected override void BeforeRun()
     {
         
@@ -56,7 +57,11 @@ public class boot : Sys.Kernel
         SessionManager.Start(terminal, ()=>
             txtMgr.info("Started kernel")
         );
-
+        if(Library.Kernel_C(0) == 0)
+        {
+            txtMgr.normal("C initialized and responding to C_calls native class");            
+        }
+        txtMgr.normal($"TEST_C_1: 64+64 = {Library.Buffer_Cnt()} ");
         taskMgr.init("subsystem:boot:syskern");
         txtMgr.warn($"Time right now is:{DateTime.Now}");
         txtMgr.aprove("Started the pre-kernel with no problems yet");
@@ -153,6 +158,7 @@ public class boot : Sys.Kernel
             Console.WriteLine("MAC:     " + NetworkManager.MacAddress?.ToString());
             Console.WriteLine("Link up: " + NetworkManager.LinkUp);
             Console.WriteLine("Ready:   " + NetworkManager.Ready);
+           
         }
 
         NetworkAdapter second = NetworkManager.GetAdapter(0);
@@ -160,20 +166,24 @@ public class boot : Sys.Kernel
         DhcpClient dhcpClient = new();
         IPConfig? config = NetworkManager.Primary.IPConfig;
         //Console.WriteLine("IP address: " + config.Address.ToString());
-        if (dhcpClient.SendDiscoverPacket() != -1)
-        {
-            //IPConfig? config = NetworkManager.Primary.IPConfig;
-            if (config is not null)
-            {
-                Console.WriteLine("IP address: " + config.Address.ToString());
-                Console.WriteLine("Subnet:     " + config.SubnetMask.ToString());
-                Console.WriteLine("Gateway:    " + config.DefaultGateway.ToString());
-            }
-        }
-        else
-        {
-            Console.WriteLine("DHCP timed out");
-        }
+
+
+        // if (dhcpClient.SendDiscoverPacket() != -1)
+        // {
+        //     //IPConfig? config = NetworkManager.Primary.IPConfig;
+        //     if (config is not null)
+        //     {
+        //         Console.WriteLine("IP address: " + config.Address.ToString());
+        //         Console.WriteLine("Subnet:     " + config.SubnetMask.ToString());
+        //         Console.WriteLine("Gateway:    " + config.DefaultGateway.ToString());
+
+        //     }
+        // }
+        // else
+        // {
+        //     Console.WriteLine("DHCP timed out");
+        // }
+
 
         // if(!File.Exists("/mnt/LNXsys/System64/instLuviz.lze") && !File.Exists("/mnt/lnxOSpage.lua") && !File.Exists("/mnt/Users/lnchck") && !File.Exists("/mnt/EFI/BOOT/BOOTX64.efi"))
         // {
@@ -213,9 +223,9 @@ public class boot : Sys.Kernel
             }
             catch
             {
-                UtilityLNX.Panic("Could not repair lundos.ini", "0x0000ef");
+                UtilityLNX.Panic("Could not repair lundos.ini", 0x000ef);
             }
-            UtilityLNX.Panic("LunDos Is dead", "0xEa0FDf");
+            UtilityLNX.Panic("LunDos Is dead", 0xEa0FD);
         }
         try
         {
@@ -225,13 +235,25 @@ public class boot : Sys.Kernel
         {
             txtMgr.error("Couldnt set the current directory to Primary partition");
         }
-        
+        if(boot.GetLimineArg("CMD"))
+        {
+            mainKrn.CliShell();
+        }
+        if (mainKrn.guionboot == "true")
+        {
+            txtMgr.aprove("Gui on boot is true");
+
+            InterfaceDevice.InitDesktopDriver();
+            Guinvas.init();
+        }
         UtilityLNX.Chckpass();
         txtMgr.aprove("Succesfully loaded with no problems");
         Console.Beep();
         
         
         Thread.Sleep(1500);
+        txtMgr.info("system initialized Succesfully with no problems");
+        txtMgr.info("if any problems occure check after line 242 on the boot file");
         mainKrn.launch();
 
     }
