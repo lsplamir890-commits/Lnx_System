@@ -20,7 +20,5 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.0.x
-    - name: Restore dependencies
-      run: dotnet restore
     - name: Test
       run: dotnet test  --verbosity normal
