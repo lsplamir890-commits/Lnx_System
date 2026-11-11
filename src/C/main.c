@@ -1,5 +1,0 @@
-EXPORT void test()
-{
-
-    return;
-}

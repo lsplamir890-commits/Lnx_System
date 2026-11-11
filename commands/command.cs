@@ -33,38 +33,44 @@ public class txtMgr
     public static void customNL(ConsoleColor colour, string text)
     {
         Console.ForegroundColor = colour;
-        Console.WriteLine(text);       
-        Console.ForegroundColor = ConsoleColor.White;        
+        Console.Write($"");         
+        Console.ForegroundColor = ConsoleColor.White; 
+        Console.WriteLine(text);    
     }
     public static void custom(ConsoleColor colour, string text)
     {
         Console.ForegroundColor = colour;
-        Console.Write(text);       
-        Console.ForegroundColor = ConsoleColor.White;        
+        Console.Write($"")         ;
+        Console.ForegroundColor = ConsoleColor.White; 
+        Console.Write(text);     
     }    
     public static void info(string text)
     {
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine($"[INF] {text}");       
+        Console.Write($"[ INF ] ");         
         Console.ForegroundColor = ConsoleColor.White; 
+        Console.WriteLine(text);
     }
     public static void warn(string text)
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
-         Console.WriteLine($"[WAR] {text}");         
+        Console.Write($"[ WAR ] ");         
         Console.ForegroundColor = ConsoleColor.White; 
+        Console.WriteLine(text);
     }
     public static void error(string text)
     {
         Console.ForegroundColor = ConsoleColor.Red;
-         Console.WriteLine($"[ERR] {text}");    
+        Console.Write($"[ ERR ] ");         
         Console.ForegroundColor = ConsoleColor.White; 
+        Console.WriteLine(text);
     }  
     public static void aprove(string text)
     {
         Console.ForegroundColor = ConsoleColor.Green;
-         Console.WriteLine($"[APR] {text}");    
+        Console.Write($"[ SUC ] ");         
         Console.ForegroundColor = ConsoleColor.White; 
+        Console.WriteLine(text);
     }  
     public static void normal(string text)
     {
@@ -72,6 +78,75 @@ public class txtMgr
         Console.WriteLine(text);
         Console.ForegroundColor = ConsoleColor.White; 
     } 
+}
+public static class LN_Message_Box
+{
+    public static void InfoMessageBox(string title, string text)
+    {
+        Console.BackgroundColor = ConsoleColor.Blue;
+        Console.Clear();
+        Console.Beep();
+        Console.BackgroundColor = ConsoleColor.Gray;
+        txtMgr.normal($"===={title}====");
+        Console.BackgroundColor = ConsoleColor.Blue;
+        txtMgr.normal("INFORMATION!:");
+        txtMgr.normal(text);
+
+
+        Console.BackgroundColor = ConsoleColor.Gray;
+        txtMgr.normal($"    OK    ");
+        Console.BackgroundColor = ConsoleColor.Blue;
+        if(Console.ReadKey(true).Key == ConsoleKey.Enter)
+        {
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Clear();
+            return;
+        }
+    }
+    public static void ErrorMessageBox(string title, string text)
+    {
+        Console.BackgroundColor = ConsoleColor.Yellow;
+        Console.Clear();
+        Console.Beep();
+        Console.BackgroundColor = ConsoleColor.Gray;
+        txtMgr.normal($"===={title}====");
+        Console.BackgroundColor = ConsoleColor.Yellow;
+        txtMgr.normal("INFORMATION!:");
+        txtMgr.normal(text);
+
+
+        Console.BackgroundColor = ConsoleColor.Gray;
+        txtMgr.normal($"    OK    ");
+        Console.BackgroundColor = ConsoleColor.Yellow;
+        if(Console.ReadKey(true).Key == ConsoleKey.Enter)
+        {
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Clear();
+            return;
+        }
+    }
+    public static void WarnMessageBox(string title, string text)
+    {
+        Console.BackgroundColor = ConsoleColor.Yellow;
+        Console.Clear();
+        Console.Beep();
+        Console.BackgroundColor = ConsoleColor.Gray;
+        txtMgr.normal($"===={title}====");
+        Console.BackgroundColor = ConsoleColor.Yellow;
+        txtMgr.normal("WARNING!:");
+        txtMgr.normal(text);
+
+
+        Console.BackgroundColor = ConsoleColor.Gray;
+        txtMgr.normal($"    OK    ");
+        Console.BackgroundColor = ConsoleColor.Yellow;
+        if(Console.ReadKey(true).Key == ConsoleKey.Enter)
+        {
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Clear();
+            return;
+        }
+    }
 }
 public class CmdMgr
 {
