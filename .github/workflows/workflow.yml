@@ -5,9 +5,9 @@ name: .NET
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "v1dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "dev" ]
 
 jobs:
   build:
@@ -23,6 +23,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build dotnet publish -c Release -r linux-x64
+      run: dotnet publish -c Release -r linux-x64
+
     - name: Test
       run: dotnet test --no-build --verbosity normal
